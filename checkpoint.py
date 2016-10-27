@@ -5,7 +5,6 @@ from IPython.core.magic import (Magics, magics_class, line_magic,
                                 cell_magic)
 import pandas as pd
 from pandas.core.frame import DataFrame, Series
-import math
 
 
 # The class MUST call this class decorator at creation time
@@ -14,10 +13,6 @@ class CheckpointMagics(Magics):
 
     def __init__(self, **kwargs):
         super(CheckpointMagics, self).__init__(**kwargs)
-        self.enabled = False
-        self.apply = DataFrame.apply
-        self.map = Series.map
-        self.applymap = DataFrame.applymap
         self.results = []
 
     @line_magic
@@ -27,35 +22,39 @@ class CheckpointMagics(Magics):
         elif line == "disable":
             self.disable()
 
-    def disable(self):
-        DataFrame.apply = self.apply
-        Series.map = self.map
-        DataFrame.applymap = self.applymap
+    @staticmethod
+    def disable():
+        del DataFrame.safe_apply
 
     def enable(self):
         from pandas.core.frame import DataFrame, Series
 
         def safe_apply(df, func, **kwargs):
 
+            # If flushed, restart from scratch.
+            if 'flush' in kwargs and kwargs['flush'] == True:
+                self.results = []
+
             # Shorten the jobs list to the DataFrame elements remaining.
             df_remaining = df.iloc[len(self.results):]
+            # print(len(df_remaining))
 
             # Replace the original applied `func` with a stateful wrapper, `new_func`.
             def new_func(srs):
                 # import pdb; pdb.set_trace()
-                success = True
                 try:
                     self.results.append(func(srs))
                 except Exception as e:
-                    success = False
+                    print("Failure on index {0}".format(len(self.results)))
                     raise
-                finally:
-                    if not success:
-                        print(self.results)
-                        self.results = self.results[math.ceil(len(self.results) / 2):]
 
             # Populate `self.results`.
-            df_remaining.apply(new_func, **kwargs)
+            if 'axis' in kwargs and (kwargs['axis'] == 1 or kwargs['axis'] == 'columns'):
+                for _, srs in df_remaining.iterrows():
+                    new_func(srs)
+            else:
+                for _, srs in df_remaining.iteritems():
+                    new_func(srs)
 
             # If we got here, then we didn't exit out due to an exception, and we can finish the method successfully.
             # Let `pandas.apply` handle concatenation using a trivial combiner.
@@ -69,6 +68,41 @@ class CheckpointMagics(Magics):
             return out
 
         DataFrame.safe_apply = safe_apply
+
+        def safe_map(srs, func, **kwargs):
+            # If flushed, restart from scratch.
+            if 'flush' in kwargs and kwargs['flush'] == True:
+                self.results = []
+
+            # Shorten the jobs list to the DataFrame elements remaining.
+            srs_remaining = srs.iloc[len(self.results):]
+
+            # Replace the original applied `func` with a stateful wrapper, `new_func`.
+            def new_func(val):
+                # import pdb; pdb.set_trace()
+                try:
+                    self.results.append(func(val))
+                except Exception:
+                    print("Failure on index {0}".format(len(self.results)))
+                    raise
+
+            # Populate `self.results`.
+            for _, val in srs_remaining.iteritems():
+                new_func(val)
+
+            # If we got here, then we didn't exit out due to an exception, and we can finish the method successfully.
+            # Let `pandas.apply` handle concatenation using a trivial combiner.
+            out = pd.Series(range(len(self.results))).apply(lambda i: self.results[i])
+            out.index = srs.index
+
+            # Reset the results set for the next iteration.
+            self.results = []
+
+            # Return
+            return out
+
+        Series.safe_map = safe_map
+
 
 def load_ipython_extension(ipython):
     ip = ipython

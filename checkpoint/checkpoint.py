@@ -1,33 +1,19 @@
-# # This code can be put in any Python module, it does not require IPython
-# # itself to be running already.  It only creates the magics subclass but
-# # doesn't instantiate it yet.
-from IPython.core.magic import (Magics, magics_class, line_magic,
-                                cell_magic)
 import pandas as pd
 from pandas.core.frame import DataFrame, Series
+import warnings
 
 
-# The class MUST call this class decorator at creation time
-@magics_class
-class CheckpointMagics(Magics):
+class CheckpointStateMachine:
 
     def __init__(self, **kwargs):
-        super(CheckpointMagics, self).__init__(**kwargs)
         self.results = []
-
-    @line_magic
-    def checkpoints(self, line):
-        if line == "enable":
-            self.enable()
-        elif line == "disable":
-            self.disable()
 
     @staticmethod
     def disable():
         del DataFrame.safe_apply
+        del Series.safe_map
 
     def enable(self):
-        from pandas.core.frame import DataFrame, Series
 
         def safe_apply(df, func, **kwargs):
 
@@ -44,8 +30,10 @@ class CheckpointMagics(Magics):
                 # import pdb; pdb.set_trace()
                 try:
                     self.results.append(func(srs))
-                except Exception as e:
-                    print("Failure on index {0}".format(len(self.results)))
+                except (KeyboardInterrupt, SystemExit):
+                    raise
+                except:
+                    warnings.warn("Failure on index {0}".format(len(self.results)), UserWarning)
                     raise
 
             # Populate `self.results`.
@@ -82,8 +70,10 @@ class CheckpointMagics(Magics):
                 # import pdb; pdb.set_trace()
                 try:
                     self.results.append(func(val))
-                except Exception:
-                    print("Failure on index {0}".format(len(self.results)))
+                except (KeyboardInterrupt, SystemExit):
+                    raise
+                except:
+                    warnings.warn("Failure on index {0}".format(len(self.results)), UserWarning)
                     raise
 
             # Populate `self.results`.
@@ -104,9 +94,6 @@ class CheckpointMagics(Magics):
         Series.safe_map = safe_map
 
 
-def load_ipython_extension(ipython):
-    ip = ipython
-    ip.register_magics(CheckpointMagics)
-
-if __name__ == "__main__":
-    load_ipython_extension(get_ipython())
+checkpointer = CheckpointStateMachine()
+disable = checkpointer.disable
+enable = checkpointer.enable

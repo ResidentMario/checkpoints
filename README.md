@@ -176,7 +176,10 @@ repackaged into a `Series` or `DataFrame`, wiped, and a `pandas` object is retur
 * Another feature useful for long-running methods are progress bars, but as of now there is no way to integrate
 `checkpoints` with e.g. [`tqdm`](https://github.com/tqdm/tqdm). The workaround for the moment is to estimate the time
 cost of your process beforehand.
+* TODO: The only keyword argument allowed by `safe_apply` and `safe_map` is `axis`. cf. [1](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.apply.html), [2](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.Series.map.html).
 * TODO: `pandas.core.group.DataFrameGroupBy.safe_apply`, `pandas.core.group.SeriesGroupBy.safe_map`, `safe_map`, etc.
+* TODO: Refactor internal code into factory functions?
+* TODO: More tests.
 
 ## See also
 

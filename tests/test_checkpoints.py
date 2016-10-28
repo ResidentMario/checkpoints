@@ -69,7 +69,6 @@ class TestSeriesMethods(unittest.TestCase):
 
     def testCompleteOutput(self):
         checkpoints.flush()
-        # import pdb; pdb.set_trace()
         srs = pd.Series(np.random.random(100))
         m1 = np.average(srs.map(lambda val: val - 0.5))
         m2 = np.average(srs.safe_map(lambda val: val - 0.5))
@@ -77,7 +76,6 @@ class TestSeriesMethods(unittest.TestCase):
 
     def testPartialOutput(self):
         checkpoints.flush()
-        # import pdb; pdb.set_trace()
         srs = pd.Series(np.random.random(100))
         srs[50] = 0
 
@@ -103,37 +101,35 @@ class TestSeriesMethods(unittest.TestCase):
         checkpoints.disable()
 
 
-# class TestDataFrameMethods(unittest.TestCase):
-#
-#     def setUp(self):
-#         checkpoints.enable()
-#
-#     def testCompleteOutput(self):
-#         checkpoints.flush()
-#         # import pdb; pdb.set_trace()
-#         srs = pd.Series(np.random.random(100))
-#         m1 = np.average(srs.map(lambda val: val - 0.5))
-#         m2 = np.average(srs.safe_map(lambda val: val - 0.5))
-#         self.assertAlmostEqual(m1, m2)
-#
-#     def testPartialOutput(self):
-#         checkpoints.flush()
-#         # import pdb; pdb.set_trace()
-#         srs = pd.Series(np.random.random(100))
-#         srs[50] = 0
-#
-#         def breaker(val):
-#             if val == 0:
-#                 raise IOError
-#             else:
-#                 return val
-#
-#         import warnings
-#         warnings.filterwarnings('ignore')
-#         with self.assertRaises(IOError):
-#             srs.safe_map(breaker)
-#         self.assertEquals(len(checkpoints._results), 50)
-#         self.assertIsNot(checkpoints._index, None)
-#
-#     def tearDown(self):
-#         checkpoints.disable()
+class TestDataFrameMethods(unittest.TestCase):
+
+    def setUp(self):
+        checkpoints.enable()
+
+    def testCompleteOutput(self):
+        checkpoints.flush()
+        df = pd.DataFrame(np.random.random(100).reshape((20, 5)))
+        m1 = np.average(df.apply(sum))
+        m2 = np.average(df.safe_apply(sum))
+        self.assertAlmostEqual(m1, m2)
+
+    def testPartialOutput(self):
+        checkpoints.flush()
+        df = pd.DataFrame(np.random.random(100).reshape((20, 5)))
+        df[2][4] = 0
+
+        def breaker(srs):
+            if 0 in srs.values:
+                raise IOError
+            else:
+                return srs.sum()
+
+        import warnings
+        warnings.filterwarnings('ignore')
+        with self.assertRaises(IOError):
+            df.safe_apply(breaker, axis='columns')
+        self.assertEquals(len(checkpoints._results), 4)
+        self.assertIsNot(checkpoints._index, None)
+
+    def tearDown(self):
+        checkpoints.disable()

@@ -82,6 +82,9 @@ You can also induce this by passing a `flush=True` argument to `safe_map`.
         3    7.873243
         dtype: float64
 
+Finally, the disable checkpoints:
+
+    >>> checkpoints.disable()
 
 ### Illustration
 

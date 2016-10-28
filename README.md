@@ -175,6 +175,11 @@ repackaged into a `Series` or `DataFrame`, wiped, and a `pandas` object is retur
 cost of your process beforehand.
 * TODO: `pandas.core.group.DataFrameGroupBy.safe_apply`, `pandas.core.group.SeriesGroupBy.safe_map`, `safe_map`, etc.
 
+## See also
+
+`checkpoints` provides a form of [defensive programming](https://en.wikipedia.org/wiki/Defensive_programming). If
+you're a fan of this sort of thing, you should also check out [`engarde`](https://github.com/TomAugspurger/engarde).
+
 ## Contributing
 
 Bugs? Thoughts? Feature requests? [Throw them at the bug tracker and I'll take a look](https://github.com/ResidentMario/missingno/issues).

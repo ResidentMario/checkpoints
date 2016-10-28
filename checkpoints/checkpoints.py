@@ -23,11 +23,9 @@ class CheckpointStateMachine:
 
             # Shorten the jobs list to the DataFrame elements remaining.
             df_remaining = df.iloc[len(self.results):]
-            # print(len(df_remaining))
 
             # Replace the original applied `func` with a stateful wrapper, `new_func`.
             def new_func(srs):
-                # import pdb; pdb.set_trace()
                 try:
                     self.results.append(func(srs))
                 except (KeyboardInterrupt, SystemExit):
@@ -67,7 +65,6 @@ class CheckpointStateMachine:
 
             # Replace the original applied `func` with a stateful wrapper, `new_func`.
             def new_func(val):
-                # import pdb; pdb.set_trace()
                 try:
                     self.results.append(func(val))
                 except (KeyboardInterrupt, SystemExit):
@@ -94,6 +91,6 @@ class CheckpointStateMachine:
         Series.safe_map = safe_map
 
 
-checkpointer = CheckpointStateMachine()
-disable = checkpointer.disable
-enable = checkpointer.enable
+checkpoints = CheckpointStateMachine()
+disable = checkpoints.disable
+enable = checkpoints.enable

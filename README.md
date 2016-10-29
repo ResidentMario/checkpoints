@@ -179,8 +179,7 @@ process beforehand.
 * `pandas.DataFrame.safe_apply` jobs on functions returning `DataFrame` are not currently implemented, and will
 simply return `None`. This means that e.g. the following will silently fail:
 
-
-    >>> pd.DataFrame({'a': [1, 2], 'b': [3, 4]}).safe_apply(lambda v: pd.DataFrame({'a': [1, 2], 'b': [2, 3]}))
+    `>>> pd.DataFrame({'a': [1, 2], 'b': [3, 4]}).safe_apply(lambda v: pd.DataFrame({'a': [1, 2], 'b': [2, 3]}))`
 
 
 * The `Series.map` `na_action` parameter is not implemented; nor are any of `broadcast`, `raw`, or `reduce` for

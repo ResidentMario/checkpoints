@@ -174,12 +174,17 @@ repackaged into a `Series` or `DataFrame`, wiped, and a `pandas` object is retur
 ## Limitations
 
 * Another feature useful for long-running methods are progress bars, but as of now there is no way to integrate
-`checkpoints` with e.g. [`tqdm`](https://github.com/tqdm/tqdm). The workaround for the moment is to estimate the time
-cost of your process beforehand.
-* TODO: The only keyword argument allowed by `safe_apply` and `safe_map` is `axis`. cf. [1](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.apply.html), [2](http://pandas.pydata.org/pandas-docs/stable/generated/pandas.Series.map.html).
-* TODO: `pandas.core.group.DataFrameGroupBy.safe_apply`, `pandas.core.group.SeriesGroupBy.safe_map`, `safe_map`, etc.
-* TODO: Refactor internal code into factory functions?
-* TODO: More tests.
+`checkpoints` with e.g. [`tqdm`](https://github.com/tqdm/tqdm). The workaround is to estimate the time cost of your
+process beforehand.
+* `pandas.DataFrame.safe_apply` jobs on functions returning `DataFrame` are not currently implemented, and will
+simply return `None`. This means that e.g. the following will silently fail:
+
+
+    >>> pd.DataFrame({'a': [1, 2], 'b': [3, 4]}).safe_apply(lambda v: pd.DataFrame({'a': [1, 2], 'b': [2, 3]}))
+
+
+* The `Series.map` `na_action` parameter is not implemented; nor are any of `broadcast`, `raw`, or `reduce` for
+`DataFrame.apply`.
 
 ## See also
 

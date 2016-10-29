@@ -14,7 +14,7 @@ Just `pip install checkpoints` to get started.
 
 To start, import `checkpoints` and enable it:
 
-    >>> import checkpoints
+    >>> from checkpoints import checkpoints
     >>> checkpoints.enable()
 
 This will augment your environment with `pandas.Series.safe_map` and `pandas.DataFrame.safe_apply` methods. Now

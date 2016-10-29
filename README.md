@@ -1,6 +1,8 @@
 # checkpoints ![t](https://img.shields.io/badge/status-alpha-red.svg)
 
-`checkpoints` is a small (for now) module that imports new `pandas.DataFrame.safe_apply` and `pandas.Series.safe_map`
+![demo](http://alekseybilogur.imgur.com/289b7b1e-c520-4a22-98fc-7791342b144e)
+
+`checkpoints` is an experimental module which imports new `pandas.DataFrame.safe_apply` and `pandas.Series.safe_map`
 expressions, stop-and-start versions of the `pandas.DataFrame.apply` and `pandas.Series.map` operations which caches
 partial results in between runtimes in case an exception is thrown.
 

@@ -12,6 +12,10 @@ process to complete, only to lose all of your data on the last iteration!
 
 Just `pip install checkpoints` to get started.
 
+## Why?
+
+For a writeup with a practical example of what `checkpoints` can do for you see [this post on my personal blog](http://www.residentmar.io/2016/10/29/saving-progress-pandas.html).
+
 ## Quickstart
 
 To start, import `checkpoints` and enable it:
@@ -87,72 +91,6 @@ You can also induce this by passing a `flush=True` argument to `safe_map`.
 Finally, the disable checkpoints:
 
     >>> checkpoints.disable()
-
-### Illustration
-
-Suppose that we have a list of phone numbers which we believe corresponds to restaurants in New York City (e.g. from
-the city's [restaurant inspection data](https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j)), and we would like to match those
-with currently opened locations using the [Yelp! API](https://www.yelp.com/developers/documentation/v2/phone_search).
-
-In other words, we are performing a fuzzy match, throwing over 27000 phone numbers of indeterminate quality at a
-(slow, networked) external API whose corner cases we don't immediately understand. At first, we might write something
- that looks like this:
-
-    # Ignoring API auth and data source details
-    >>> def yelp(num):
-            business = client.phone_search(num).businesses[0]
-            return {'Yelp Name': business.name,
-                    'Yelp Address': business.location.address,
-                    'Yelp Latitude': business.location.coordinate.latitude,
-                    'Yelp Longitude': business.location.coordinate.longitude}
-
-    >>> yelp_data = restaurants['PHONE'].map(yelp)
-
-What could go wrong? Lots. In order of increasing subtlety:
-
-* The list could contain `np.nan` values.
-* The API could fail to find a location with this associated phone number.
-* The API could return only partial information, lacking a `business.location` object.
-* The API could return only partial information, lacking a `business.location.coordinate` object.
-* The list could contain obviously invalid entries (e.g. entry number 2702 is `__________`).
-* The list could contain subtly invalid entries&mdash;numbers, but not phone numbers (e.g. entry number 23720
-is `1646644665.0`).
-* The network could glitch and fail on you mid-process, causing an `HTTPError`.
-
-If you are initially ignorant of these problems, your `apply` will stumble into these, forcing you to fix each in
-turn, losing all of the data from your previous partial runs in the process. With the second-to-last error especially,
-you'll run for 22 minutes before you error out and lose everything, and if you're foolish enough to try to do all
-27000+ numbers in one run, the second-to-last issue could potentially kill your process after 2 **hours** of processing
- time.
-
-`checkpoints` provides a better way, using a newly registered `pandas.Series.safe_map` method:
-
-    >>> yelp_data = restaurants['PHONE'].safe_map(yelp)
-
-Every time this function is called, the operation will pick up back where it failed, instead of starting all over
-again. This really very simple change makes it completely safe to just go ahead and chuck everything at it, all at
-once; any errors you encounter you can fix by patching the `yelp` method along the way, without losing
-any results in the middle of things.
-
-Put another way, here's the completely correct `yelp` method that you **wouldn't** have to come up with ahead of time:
-
-    def yelp(num):
-        if not num:
-            return None
-        else:
-            try:
-                business = client.phone_search(num).businesses[0]
-                if business and business.location and business.location.coordinate:
-                    return {'Yelp Name': business.name,
-                            'Yelp Address': business.location.address,
-                            'Yelp Latitude': business.location.coordinate.latitude,
-                            'Yelp Longitude': business.location.coordinate.longitude}
-                else:  # Partial information, skip.
-                    return None
-            except IndexError:  # Phone search failed!
-                return None  # Phone search failed!
-            except yelp.errors.InvalidParameter:  # Invalid number!
-                return None
 
 ## Performance
 

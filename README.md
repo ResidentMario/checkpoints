@@ -132,6 +132,6 @@ you're a fan of this sort of thing, you should also check out [`engarde`](https:
 
 ## Contributing
 
-Bugs? Thoughts? Feature requests? [Throw them at the bug tracker and I'll take a look](https://github.com/ResidentMario/missingno/issues).
+Bugs? Thoughts? Feature requests? [Throw them at the bug tracker and I'll take a look](https://github.com/ResidentMario/checkpoints/issues).
 
 As always I'm very interested in hearing feedback&mdash;reach out to me at `aleksey@residentmar.io`.

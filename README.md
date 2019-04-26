@@ -1,4 +1,4 @@
-# checkpoints [![PyPi version](https://img.shields.io/pypi/v/checkpoints.svg)](https://pypi.python.org/pypi/missingno/) ![t](https://img.shields.io/badge/status-alpha-red.svg)
+# checkpoints [![PyPi version](https://img.shields.io/pypi/v/checkpoints.svg)](https://pypi.python.org/pypi/missingno/) ![t](https://img.shields.io/badge/status-stable-green.svg)
 
 ![demo](http://i.imgur.com/paxQ51Y.gif)
 

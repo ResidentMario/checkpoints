@@ -1,4 +1,5 @@
 import pandas as pd
+from tqdm import tqdm
 from pandas.core.frame import DataFrame, Series
 import warnings
 
@@ -74,12 +75,12 @@ class CheckpointStateMachine:
             # Populate `self.results`.
             if 'axis' in kwargs and (kwargs['axis'] == 1 or kwargs['axis'] == 'columns'):
                 kwargs.pop('axis')
-                for _, srs in df_remaining.iterrows():
+                for _, srs in tqdm(df_remaining.iterrows(), total=len(df_remaining)):
                     wrapper(srs, **kwargs)
             else:
                 if 'axis' in kwargs:
                     kwargs.pop('axis')
-                for _, srs in df_remaining.iteritems():
+                for _, srs in tqdm(df_remaining.iteritems(), total=len(df_remaning.columns)):
                     wrapper(srs, **kwargs)
 
             # If we got here, then we didn't exit out due to an exception, and we can finish the method successfully.
@@ -127,7 +128,7 @@ class CheckpointStateMachine:
                     raise
 
             # Populate `self.results`.
-            for _, val in srs_remaining.iteritems():
+            for _, val in tqdm(srs_remaining.iteritems(), total=len(srs_remaining)):
                 wrapper(val)
 
             # If we got here, then we didn't exit out due to an exception, and we can finish the method successfully.
